@@ -33,6 +33,15 @@ export type TimeRange =
   | "This Month"
   | "Earlier";
 
+interface GroupedReviews {
+  Today: Review[];
+  Yesterday: Review[];
+  "This Week": Review[];
+  "Last Week": Review[];
+  "This Month": Review[];
+  Earlier: Review[];
+}
+
 interface ReviewContextType {
   reviews: Review[];
   totalReviews: number;
@@ -46,6 +55,7 @@ interface ReviewContextType {
   setTimeFilter: (range: TimeRange) => void;
   fetchReviews: () => void;
   filteredReviews: Review[];
+  groupedReviews: GroupedReviews;
 }
 
 const ReviewContext = createContext<ReviewContextType | undefined>(undefined);
@@ -102,6 +112,46 @@ export function ReviewProvider({ children }: { children: React.ReactNode }) {
     return filtered;
   }, [reviews, keywordFilter, starFilter]);
 
+  const groupReviewsByDate = useCallback((reviews: Review[]) => {
+    const groups = {
+      Today: [] as Review[],
+      Yesterday: [] as Review[],
+      "This Week": [] as Review[],
+      "Last Week": [] as Review[],
+      "This Month": [] as Review[],
+      Earlier: [] as Review[],
+    };
+
+    const now = new Date();
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    reviews.forEach((review) => {
+      const reviewDate = new Date(review.date);
+      const diffDays = Math.round(
+        (now.getTime() - reviewDate.getTime()) / oneDay
+      );
+
+      if (diffDays === 0) {
+        groups["Today"].push(review);
+      } else if (diffDays === 1) {
+        groups["Yesterday"].push(review);
+      } else if (diffDays <= 7) {
+        groups["This Week"].push(review);
+      } else if (diffDays <= 14) {
+        groups["Last Week"].push(review);
+      } else if (
+        reviewDate.getMonth() === now.getMonth() &&
+        reviewDate.getFullYear() === now.getFullYear()
+      ) {
+        groups["This Month"].push(review);
+      } else {
+        groups["Earlier"].push(review);
+      }
+    });
+
+    return groups;
+  }, []);
+
   const value = {
     reviews,
     totalReviews,
@@ -115,6 +165,7 @@ export function ReviewProvider({ children }: { children: React.ReactNode }) {
     setTimeFilter,
     fetchReviews,
     filteredReviews: filteredReviews(),
+    groupedReviews: groupReviewsByDate(filteredReviews()),
   };
 
   return (
