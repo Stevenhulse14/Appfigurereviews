@@ -9,6 +9,10 @@ const config: NextConfig = {
         protocol: "https",
         hostname: "**.appfigures.com",
       },
+      {
+        protocol: "https",
+        hostname: "**.vercel.app",
+      },
     ],
   },
 
