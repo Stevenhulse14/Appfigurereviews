@@ -1,7 +1,10 @@
 "use client";
 
-import { useReviewContext, TimePeriod } from "@/context/ReviewContext";
+import { useDispatch, useSelector } from "react-redux";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { RootState } from "@/redux/store";
+import { setSelectedPeriod } from "@/redux/reviewSlice";
+import { TimePeriod } from "@/types/reviews";
 import { useState, useEffect } from "react";
 
 const abbreviations: Record<TimePeriod, string> = {
@@ -16,21 +19,31 @@ const abbreviations: Record<TimePeriod, string> = {
 };
 
 export default function ReviewSidebar() {
-  const { groupedReviews, setSelectedPeriod, selectedPeriod, timePeriods } =
-    useReviewContext();
+  const dispatch = useDispatch();
+  const { groupedReviews, selectedPeriod } = useSelector(
+    (state: RootState) => state.reviews
+  );
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const timePeriods: TimePeriod[] = [
+    "Today",
+    "Yesterday",
+    "This Week",
+    "Last Week",
+    "This Month",
+    "Last Month",
+    "Two Months Ago",
+    "Three Months Ago",
+  ];
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
-        // lg breakpoint
         setIsCollapsed(true);
       }
     };
 
-    // Initial check
     handleResize();
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -60,14 +73,11 @@ export default function ReviewSidebar() {
         </button>
       </div>
 
-      <ul className="space-y-2 p-2 bg-orange-lighter">
+      <ul className="p-2 bg-orange-lighter">
         {timePeriods.map((period) => (
           <li key={period}>
             <button
-              onClick={() => {
-                setSelectedPeriod(period);
-                console.log("Selected period:", period);
-              }}
+              onClick={() => dispatch(setSelectedPeriod(period))}
               className={`w-full text-left px-2 py-2.5 rounded-lg text-xxs flex justify-between text-gray-700 items-center ${
                 selectedPeriod === period
                   ? "bg-primary text-white"
@@ -79,12 +89,12 @@ export default function ReviewSidebar() {
                   <span>{abbreviations[period]}</span>
                   <span
                     className={`absolute -top-3 -right-1 text-xs ${
-                      groupedReviews[period]?.length > 0
+                      groupedReviews[period].length > 0
                         ? "text-green-500"
                         : "text-red-700"
                     }`}
                   >
-                    {groupedReviews[period]?.length || 0}
+                    {groupedReviews[period].length || 0}
                   </span>
                 </div>
               ) : (
@@ -92,12 +102,12 @@ export default function ReviewSidebar() {
                   <span>{period}</span>
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full ${
-                      groupedReviews[period]?.length > 0
+                      groupedReviews[period].length > 0
                         ? "bg-green-900/20 text-green-700"
                         : "bg-red-900/20 text-red-700"
                     }`}
                   >
-                    {groupedReviews[period]?.length || 0}
+                    {groupedReviews[period].length || 0}
                   </span>
                 </>
               )}

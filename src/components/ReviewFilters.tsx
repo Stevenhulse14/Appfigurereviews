@@ -1,22 +1,26 @@
 "use client";
 
-import { useReviewContext } from "@/context/ReviewContext";
+import { useDispatch, useSelector } from "react-redux";
 import { ChevronLeft, ChevronRight, Search, Star } from "lucide-react";
+import { RootState } from "@/redux/store";
+import {
+  setKeywordFilter,
+  setStarFilter,
+  setPage,
+  setCount,
+} from "@/redux/reviewSlice";
 
 export default function ReviewFilters() {
+  const dispatch = useDispatch();
   const {
     count,
-    setCount,
     loading,
     page,
     totalPages,
     totalReviews,
-    setPage,
     keywordFilter,
-    setKeywordFilter,
     starFilter,
-    setStarFilter,
-  } = useReviewContext();
+  } = useSelector((state: RootState) => state.reviews);
 
   return (
     <div className="bg-orange-lighter rounded-lg p-4">
@@ -27,9 +31,9 @@ export default function ReviewFilters() {
           <input
             type="text"
             value={keywordFilter}
-            onChange={(e) => setKeywordFilter(e.target.value)}
+            onChange={(e) => dispatch(setKeywordFilter(e.target.value))}
             placeholder="Search reviews..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm bg-white/10 text-gray-700 placeholder-gray-500"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg text-xxs bg-white/10 text-gray-700 placeholder-gray-500"
           />
         </div>
 
@@ -38,8 +42,10 @@ export default function ReviewFilters() {
           {[1, 2, 3, 4, 5].map((rating) => (
             <button
               key={rating}
-              onClick={() => setStarFilter(rating === starFilter ? 0 : rating)}
-              className={`px-3 py-2 rounded-lg text-sm flex items-center gap-1 ${
+              onClick={() =>
+                dispatch(setStarFilter(rating === starFilter ? 0 : rating))
+              }
+              className={`px-3 py-2 rounded-lg text-xxs flex items-center gap-1 ${
                 rating === starFilter
                   ? "bg-primary text-blue-500"
                   : "bg-white/10 text-gray-700 hover:bg-orange-lighter"
@@ -58,10 +64,10 @@ export default function ReviewFilters() {
         <select
           value={count}
           onChange={(e) => {
-            setCount(Number(e.target.value) as 25 | 50 | 100 | 500);
-            setPage(1);
+            dispatch(setCount(Number(e.target.value) as 25 | 50 | 100 | 500));
+            dispatch(setPage(1));
           }}
-          className="px-3 py-2.5 rounded-lg text-sm bg-white/10 text-gray-700"
+          className="px-3 py-2.5 rounded-lg text-xxs bg-white/10 text-gray-700"
         >
           <option value={25}>25 per page</option>
           <option value={50}>50 per page</option>
@@ -72,17 +78,17 @@ export default function ReviewFilters() {
         {/* Pagination Controls */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setPage(Math.max(1, page - 1))}
+            onClick={() => dispatch(setPage(Math.max(1, page - 1)))}
             disabled={page === 1 || loading}
             className="p-2.5 rounded-lg bg-white/10 text-gray-700 hover:bg-orange-lighter disabled:opacity-50"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm text-gray-700">
+          <span className="text-xxs text-gray-700">
             Page {page} of {totalPages}
           </span>
           <button
-            onClick={() => setPage(Math.min(totalPages, page + 1))}
+            onClick={() => dispatch(setPage(Math.min(totalPages, page + 1)))}
             disabled={page === totalPages || loading}
             className="p-2.5 rounded-lg bg-white/10 text-gray-700 hover:bg-orange-lighter disabled:opacity-50"
           >
@@ -91,7 +97,7 @@ export default function ReviewFilters() {
         </div>
 
         {/* Review Count */}
-        <span className="text-sm text-gray-700">
+        <span className="text-xxs text-gray-700">
           Showing {Math.min(page * count, totalReviews)} of {totalReviews}{" "}
           reviews
         </span>

@@ -1,20 +1,33 @@
 "use client";
 
 import { useEffect } from "react";
-import { useReviewContext } from "../context/ReviewContext";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "@/redux/store";
+import { fetchReviews } from "@/redux/reviewSlice";
 import ReviewItem from "./ReviewItem";
-import LoadingReviews from "./LoadingReviews";
+
+const useAppDispatch = () => useDispatch<AppDispatch>();
 
 export default function ReviewList() {
-  const { groupedReviews, selectedPeriod, fetchReviews, loading, error } =
-    useReviewContext();
+  const dispatch = useAppDispatch();
+  const { groupedReviews, selectedPeriod, loading, error, page, count } =
+    useSelector((state: RootState) => state.reviews);
 
   useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
+    dispatch(fetchReviews({ page, count }));
+  }, [dispatch, page, count]);
 
-  if (loading) return <LoadingReviews />;
-  if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center p-4">{error}</div>;
+  }
 
   const reviews = groupedReviews[selectedPeriod] || [];
 

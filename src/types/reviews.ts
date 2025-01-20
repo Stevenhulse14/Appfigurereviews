@@ -1,18 +1,39 @@
-// Defines the structure of a review object
-export type Review = {
-  id: number; // Unique identifier for the review
-  rating: number; // Rating score (typically 1-5)
-  text: string; // The review content
-  appName: string; // Name of the reviewed app
-  date: string; // Date the review was posted
-};
+export type TimePeriod =
+  | "Today"
+  | "Yesterday"
+  | "This Week"
+  | "Last Week"
+  | "This Month"
+  | "Last Month"
+  | "Two Months Ago"
+  | "Three Months Ago";
 
-// Defines possible filtering options for reviews
+export interface Review {
+  author: string;
+  title: string;
+  review: string;
+  original_title: string;
+  original_review: string;
+  stars: string;
+  iso: string;
+  version: string;
+  date: string;
+  deleted: boolean;
+  has_response: boolean;
+  product: number;
+  product_id: number;
+  product_name: string;
+  vendor_id: string;
+  store: string;
+  weight: number;
+  id: string;
+  predicted_langs: string[];
+}
+
 export type ReviewFilters = {
-  minRating?: number; // Optional minimum rating filter
-  appName?: string; // Optional filter by app name
+  minRating?: number;
+  appName?: string;
   dateRange?: {
-    // Optional date range filter
     start: string;
     end: string;
   };

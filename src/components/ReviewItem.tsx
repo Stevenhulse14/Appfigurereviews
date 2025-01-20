@@ -1,5 +1,7 @@
+"use client";
+
 import { Star, Share2, MessageCircle, Languages } from "lucide-react";
-import { Review } from "../context/ReviewContext";
+import { Review } from "@/types/reviews";
 
 export default function ReviewItem({ review }: { review: Review }) {
   return (
@@ -31,7 +33,9 @@ export default function ReviewItem({ review }: { review: Review }) {
         </h3>
       </div>
       <div className="flex-1 flex flex-col">
-        <p className="text-gray-700 mb-auto line-clamp-3">{review.review}</p>
+        <p className="text-gray-700 mb-auto text-xxs line-clamp-3">
+          {review.review}
+        </p>
       </div>
       <div className="space-y-2">
         <div className="text-xxs text-gray-500 flex gap-1 items-center">

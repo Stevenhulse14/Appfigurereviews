@@ -1,6 +1,6 @@
 import "./globals.css";
 import NavigationBar from "@/components/NavigationBar";
-import { ReviewProvider } from "@/context/ReviewContext";
+import { Providers } from "./providers";
 
 export const metadata = {
   title: "Appfigures Reviews",
@@ -15,8 +15,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="text-xs min-h-screen bg-gradient-to-r from-gradient-start to-gradient-end">
-        <NavigationBar />
-        <ReviewProvider>{children}</ReviewProvider>
+        <Providers>
+          <NavigationBar />
+          {children}
+        </Providers>
       </body>
     </html>
   );
