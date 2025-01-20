@@ -5,8 +5,13 @@ export const fetchReviews = createAsyncThunk<
   { reviews: Review[]; total: number; pages: number },
   { page: number; count: number }
 >("reviews/fetchReviews", async ({ page, count }) => {
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (!baseUrl) {
+    throw new Error("API base URL not configured");
+  }
+
   const response = await fetch(
-    `https://appfigures.com/_u/jobs/twitter-reviews?page=${page}&count=${count}&sort=-date&products=56556`
+    `${baseUrl}?page=${page}&count=${count}&sort=-date&products=56556`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch reviews");
