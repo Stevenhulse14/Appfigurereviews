@@ -2,8 +2,7 @@
 
 import ReviewList from "@/components/ReviewList";
 import ReviewSidebar from "@/components/ReviewSidebar";
-import KeywordFilter from "@/components/KeywordFilter";
-import StarFilter from "@/components/StarFilter";
+import ReviewFilters from "@/components/ReviewFilters";
 
 export default function Reviews() {
   return (
@@ -11,11 +10,8 @@ export default function Reviews() {
       <h5 className="text-xl font-bold text-orange-light mb-2 text-center [text-shadow:_-1px_-1px_0_#000,_1px_-1px_0_#000,_-1px_1px_0_#000,_1px_1px_0_#000]">
         Twitter App Reviews
       </h5>
-      <div className="flex flex-col sm:flex-row justify-end gap-4 mb-4">
-        <KeywordFilter />
-        <StarFilter />
-      </div>
-      <div className="flex gap-4">
+      <ReviewFilters />
+      <div className="flex gap-4 mt-4">
         <ReviewSidebar />
         <div className="flex-1 min-w-0">
           <ReviewList />
