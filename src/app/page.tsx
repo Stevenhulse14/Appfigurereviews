@@ -1,13 +1,21 @@
 "use client";
 //import NavigationBar from "../components/NavigationBar";
+import ThreeDTitle from "@/components/ThreeDTitle";
 
 export default function Home() {
   return (
     <div>
       {/* <NavigationBar /> */}
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-orange-light mb-6 text-center [text-shadow:_-1px_-1px_0_#000,_1px_-1px_0_#000,_-1px_1px_0_#000,_1px_1px_0_#000]">
-          Welcome to Appfigures Reviews Explorer
+        <ThreeDTitle />
+        <h1
+          className="text-4xl font-extrabold text-orange-light mb-6 text-center 
+          [text-shadow:_0_1px_0_rgb(0_0_0),_0_2px_0_rgb(0_0_0),_0_3px_0_rgb(0_0_0),_0_4px_0_rgb(0_0_0),
+          _0_5px_0_rgb(0_0_0),_0_6px_0_rgb(0_0_0),_0_7px_0_rgb(0_0_0),_0_8px_0_rgb(0_0_0),
+          _0_9px_0_rgb(0_0_0),_0_10px_30px_rgba(0,0,0,0.6)] 
+          tracking-wide transform hover:translate-y-[-5px] transition-transform duration-300"
+        >
+          Welcome to Appfigures Reviews
         </h1>
         <p className="text-lg text-gray-700 mb-8 text-center max-w-2xl mx-auto">
           Explore and analyze user reviews for the Twitter iOS app with our
@@ -50,59 +58,3 @@ export default function Home() {
     </div>
   );
 }
-
-// import { Review } from "@/types/reviews";
-// import { ReviewCard } from "@/components/ReviewCard";
-
-// // Mock data for development/testing
-// // In a real app, this would come from an API call
-// const reviews: Review[] = [
-//   {
-//     id: 1,
-//     rating: 5,
-//     text: "Great app, love it! The new features are amazing and the interface is so intuitive.",
-//     appName: "Instagram",
-//     date: "2024-03-20",
-//   },
-//   {
-//     id: 2,
-//     rating: 4,
-//     text: "Pretty good overall, but could use some performance improvements.",
-//     appName: "Instagram",
-//     date: "2024-03-19",
-//   },
-//   {
-//     id: 3,
-//     rating: 3,
-//     text: "It's okay, but I miss some of the old features. The new update is a bit confusing.",
-//     appName: "Instagram",
-//     date: "2024-03-18",
-//   },
-// ];
-
-// // Home page component that displays all reviews
-// export default function Home() {
-//   return (
-//     <main className="p-4 bg-gradient-to-r from-gradient-start to-gradient-end">
-//       <h1 className="text-2xl font-bold mb-6 text-white">App Reviews</h1>
-//       {/* Map through reviews array and render ReviewCard for each */}
-//       <div className="space-y-4">
-//         <ReviewCard
-//           review={reviews[0]}
-//           onDelete={(id) => console.log("Delete review:", id)}
-//           variant="dark"
-//         />
-//         <ReviewCard
-//           review={reviews[1]}
-//           onDelete={(id) => console.log("Delete review:", id)}
-//           variant="light"
-//         />
-//         <ReviewCard
-//           review={reviews[2]}
-//           onDelete={(id) => console.log("Delete review:", id)}
-//           variant="black"
-//         />
-//       </div>
-//     </main>
-//   );
-//}

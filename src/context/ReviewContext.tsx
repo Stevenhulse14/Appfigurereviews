@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 
 export interface Review {
   author: string;
@@ -33,13 +40,18 @@ export type TimeRange =
   | "This Month"
   | "Earlier";
 
+export type TimePeriod =
+  | "Today"
+  | "Yesterday"
+  | "This Week"
+  | "Last Week"
+  | "This Month"
+  | "Last Month"
+  | "Two Months Ago"
+  | "Three Months Ago";
+
 interface GroupedReviews {
-  Today: Review[];
-  Yesterday: Review[];
-  "This Week": Review[];
-  "Last Week": Review[];
-  "This Month": Review[];
-  Earlier: Review[];
+  [key: string]: Review[];
 }
 
 interface ReviewContextType {
@@ -50,11 +62,19 @@ interface ReviewContextType {
   keywordFilter: string;
   starFilter: number;
   timeFilter: TimeRange;
+  timePeriods: TimePeriod[];
+  selectedPeriod: TimePeriod;
+  page: number;
+  count: number;
+  totalPages: number;
   setKeywordFilter: (keyword: string) => void;
   setStarFilter: (rating: number) => void;
   setTimeFilter: (range: TimeRange) => void;
+  setSelectedPeriod: (period: TimePeriod) => void;
+  setPage: (page: number) => void;
+  setCount: (count: 25 | 50 | 100 | 500) => void;
+  loadMoreReviews: () => void;
   fetchReviews: () => void;
-  filteredReviews: Review[];
   groupedReviews: GroupedReviews;
 }
 
@@ -68,25 +88,56 @@ export function ReviewProvider({ children }: { children: React.ReactNode }) {
   const [keywordFilter, setKeywordFilter] = useState("");
   const [starFilter, setStarFilter] = useState(0);
   const [timeFilter, setTimeFilter] = useState<TimeRange>("All");
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>("Today");
+  const [page, setPage] = useState(1);
+  const [count, setCount] = useState<25 | 50 | 100 | 500>(25);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const timePeriods: TimePeriod[] = [
+    "Today",
+    "Yesterday",
+    "This Week",
+    "Last Week",
+    "This Month",
+    "Last Month",
+    "Two Months Ago",
+    "Three Months Ago",
+  ];
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(
-        "https://appfigures.com/_u/jobs/twitter-reviews?stars=5&count=100&products=56556"
-      );
+      const url =
+        `https://appfigures.com/_u/jobs/twitter-reviews?` +
+        `page=${page}` +
+        `&count=${count}` +
+        `&sort=-date` +
+        `&products=56556`;
+
+      const response = await fetch(url);
       const data = await response.json();
-      console.log(data);
-      setReviews(data.reviews);
-      setTotalReviews(data.total);
+
+      // Always set new reviews instead of appending
+      setReviews(data.reviews || []);
+      setTotalReviews(Number(data.total) || 0);
+      setTotalPages(data.pages || 1);
     } catch (err: unknown) {
+      console.error("Fetch error:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch reviews");
+      setTotalReviews(0);
+      setReviews([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, count]);
+
+  const loadMoreReviews = useCallback(() => {
+    if (page < totalPages) {
+      setPage((prev) => prev + 1);
+    }
+  }, [page, totalPages]);
 
   const filteredReviews = useCallback(() => {
     let filtered = reviews;
@@ -119,38 +170,69 @@ export function ReviewProvider({ children }: { children: React.ReactNode }) {
       "This Week": [] as Review[],
       "Last Week": [] as Review[],
       "This Month": [] as Review[],
-      Earlier: [] as Review[],
+      "Last Month": [] as Review[],
+      "Two Months Ago": [] as Review[],
+      "Three Months Ago": [] as Review[],
     };
 
+    if (!reviews) return groups;
+
     const now = new Date();
-    const oneDay = 24 * 60 * 60 * 1000;
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
     reviews.forEach((review) => {
       const reviewDate = new Date(review.date);
-      const diffDays = Math.round(
-        (now.getTime() - reviewDate.getTime()) / oneDay
-      );
+      // Set to start of day for accurate comparison
+      reviewDate.setHours(0, 0, 0, 0);
 
-      if (diffDays === 0) {
-        groups["Today"].push(review);
-      } else if (diffDays === 1) {
-        groups["Yesterday"].push(review);
-      } else if (diffDays <= 7) {
-        groups["This Week"].push(review);
-      } else if (diffDays <= 14) {
-        groups["Last Week"].push(review);
-      } else if (
-        reviewDate.getMonth() === now.getMonth() &&
-        reviewDate.getFullYear() === now.getFullYear()
-      ) {
-        groups["This Month"].push(review);
-      } else {
-        groups["Earlier"].push(review);
-      }
+      // Calculate differences
+      const isToday = reviewDate.getTime() === today.getTime();
+      const isYesterday = reviewDate.getTime() === yesterday.getTime();
+      const diffDays = Math.floor(
+        (today.getTime() - reviewDate.getTime()) / (24 * 60 * 60 * 1000)
+      );
+      const diffMonths =
+        (now.getFullYear() - reviewDate.getFullYear()) * 12 +
+        (now.getMonth() - reviewDate.getMonth());
+
+      // Group based on date
+      if (isToday) groups["Today"].push(review);
+      else if (isYesterday) groups["Yesterday"].push(review);
+      else if (diffDays <= 7) groups["This Week"].push(review);
+      else if (diffDays <= 14) groups["Last Week"].push(review);
+      else if (diffMonths === 0) groups["This Month"].push(review);
+      else if (diffMonths === 1) groups["Last Month"].push(review);
+      else if (diffMonths === 2) groups["Two Months Ago"].push(review);
+      else if (diffMonths === 3) groups["Three Months Ago"].push(review);
     });
 
     return groups;
   }, []);
+
+  // Add a ref to track initial load
+  const initialLoadRef = useRef(false);
+
+  useEffect(() => {
+    if (!initialLoadRef.current && reviews.length > 0) {
+      const groups = groupReviewsByDate(reviews);
+      // Find first period with reviews
+      const firstPeriodWithReviews = timePeriods.find(
+        (period) => groups[period]?.length > 0
+      );
+
+      if (firstPeriodWithReviews) {
+        setSelectedPeriod(firstPeriodWithReviews);
+        initialLoadRef.current = true; // Mark as initialized
+      }
+    }
+  }, [reviews, groupReviewsByDate, timePeriods]);
+
+  // Add this to debug state changes
+  useEffect(() => {
+    console.log("Selected period changed to:", selectedPeriod);
+  }, [selectedPeriod]);
 
   const value = {
     reviews,
@@ -160,11 +242,19 @@ export function ReviewProvider({ children }: { children: React.ReactNode }) {
     keywordFilter,
     starFilter,
     timeFilter,
+    timePeriods,
+    selectedPeriod,
+    page,
+    count,
+    totalPages,
     setKeywordFilter,
     setStarFilter,
     setTimeFilter,
+    setSelectedPeriod,
+    setPage,
+    setCount,
+    loadMoreReviews,
     fetchReviews,
-    filteredReviews: filteredReviews(),
     groupedReviews: groupReviewsByDate(filteredReviews()),
   };
 

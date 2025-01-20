@@ -32,16 +32,18 @@ export default function ReviewAccordion({
         )}
       </button>
       {isOpen && (
-        <div className="p-4 space-y-4">
-          {reviews.length > 0 ? (
-            reviews.map((review) => (
-              <ReviewItem key={review.id} review={review} />
-            ))
-          ) : (
-            <p className="text-gray-400 text-center italic">
-              No reviews for this period
-            </p>
-          )}
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+            {reviews.length > 0 ? (
+              reviews.map((review) => (
+                <ReviewItem key={review.id} review={review} />
+              ))
+            ) : (
+              <p className="text-gray-400 text-center italic col-span-full">
+                No reviews for this period
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>
